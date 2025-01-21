@@ -1,0 +1,14 @@
+*.nes
+*.fds
+*.lst
+.DS_Store
+Thumbs.db
+*.nl
+*.cdl
+*.mlb
+asm6f
+*.chr
+*.bat
+*.exe
+*.bin
+*.prg
