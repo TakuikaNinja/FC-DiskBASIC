@@ -60,7 +60,7 @@ Family BASIC/NS-HUBASIC (C) 1984 Nintendo/Sharp/Hudson
 This project is purely for preservation, demonstration, and educational purposes.
 
 - Kudos to the magazine contributors, editors, and publishers who originally created the port and documented the process.
-- This project was made possible by Enri, who provided Japanese documentation for the recreation process: https://http://cmpslv3.stars.ne.jp/Konjo/027/027.htm
+- This project was made possible by Enri, who provided Japanese documentation for the recreation process: http://cmpslv3.stars.ne.jp/Konjo/027/027.htm
 - Forum discussion: https://forums.nesdev.org/viewtopic.php?t=25171
 - Mesen (https://www.mesen.ca/) was used for testing.
 
