@@ -13,7 +13,6 @@ asm6f
 *.bin
 *.prg
 *.o
-*.cfg
 *.dbg
 *.labels.txt
 *.map.txt
