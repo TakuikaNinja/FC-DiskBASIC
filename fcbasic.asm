@@ -29,81 +29,6 @@
 	.define FILE "Family BASIC (Japan) (Rev 2).nes"
 
 ; ----------------------------------------------------------------------------------------------------------------------------------
-; Prepare original dump for patching
-	.segment "ORIGINAL"
-	.incbin FILE, INES_HDR, PRG_SIZE
-
-; Macro for most patched byte (hi byte of program memory starting address)
-	.macro pointer_stub_in segment
-		.segment segment
-		.byte $60
-	.endmacro
-	
-; Apply 15 instances of said patch
-; This expands the program memory to 8126 bytes!
-	.repeat 15, I
-	pointer_stub_in .concat("POINTER_", .string(I))
-	.endrepeat
-	
-; Specific patches
-	.segment "PATCH_0"
-		jmp $80f0 ; replaces jsr $8131
-	
-	.segment "PATCH_1"
-	.addr $b5af ; replaces operand of jmp $80ad
-	
-	.segment "PATCH_2"
-		nop ; replaces cli
-	
-	.segment "PATCH_3"
-	.byte $7f
-	
-	.segment "PATCH_4"
-	.byte $80
-	
-	.segment "BGTOOL_CMD"
-	.byte "BGTOOL" ; new command to launch BG GRAPHIC, replaces SYSTEM command
-	
-	.segment "PATCH_5"
-	.byte $44
-	
-	.segment "RESET_PATCH_0"
-		nop ; replaces jsr $cd94
-		nop
-		nop
-	
-	.segment "RESET_PATCH_1"
-		sta PPUCTRL ; replace parts of the init code with FDS init code (also skips intro sequence)
-		sta $10
-		lda #$0f
-		sta SND_CHN ; enable all APU channels except DMC
-		lda #$ff
-		sta NMI_FLAG ; select NMI #3
-		sta IRQ_FLAG ; select isk game IRQ
-		lda #$35
-		sta RST_FLAG ; set flag so soft resets work
-		lda #$53 ; soft reset
-		sta RST_TYPE
-		lda #$26 ; horizontal arrangement (vertical mirroring)
-		sta FDS_CTRL
-		jmp $80ad
-	
-	.segment "VECTORS_PATCH"
-; Note: IRQ handler is also bad in the original (rts x3)
-; (At least you can rewrite it to use IRQs in machine code programs now) 
-IRQ:
-		cli
-	.byte $5c, $60, $00 ; unofficial opcode: IGN $0060,x?
-	.addr $00ed ; NMI vector?
-	
-	; Interrupt vectors
-	.addr $00ed ; NMI #1
-	.addr $00ed ; NMI #1
-	.addr $00ed ; NMI #3, default
-	.addr $c400 ; Reset
-	.addr IRQ ; IRQ (unused?)
-
-; ----------------------------------------------------------------------------------------------------------------------------------
 ; Disk Structure
 	.segment "SIDE1A"
 	
@@ -161,5 +86,75 @@ IRQ:
 	
 	.byte FileDataBlock
 	.segment "FILE2_DAT"
-	.incbin "prg.bin"
+; Prepare original dump for patching
+	.incbin FILE, INES_HDR, PRG_SIZE
+
+; Macro for most patched byte (hi byte of program memory starting address)
+	.macro pointer_stub_in segment
+		.segment segment
+		.byte $60
+	.endmacro
+	
+; Apply 15 instances of said patch
+; This expands the program memory to 8126 bytes!
+	.repeat 15, I
+		pointer_stub_in .concat("POINTER_", .string(I))
+	.endrepeat
+	
+; Specific patches
+	.segment "PATCH_0"
+		jmp $80f0 ; replaces jsr $8131
+	
+	.segment "PATCH_1"
+	.addr $b5af ; replaces operand of jmp $80ad
+	
+	.segment "PATCH_2"
+		nop ; replaces cli
+	
+	.segment "PATCH_3"
+	.byte $7f
+	
+	.segment "PATCH_4"
+	.byte $80
+	
+	.segment "BGTOOL_CMD"
+	.byte "BGTOOL" ; new command to launch BG GRAPHIC, replaces SYSTEM command
+	
+	.segment "PATCH_5"
+	.byte 'D' ; replaces version letter to make "V2.1D"
+	
+	.segment "RESET_PATCH_0"
+		nop ; replaces jsr $cd94
+		nop
+		nop
+	
+	.segment "RESET_PATCH_1"
+		sta PPUCTRL ; replace parts of the init code with FDS init code (also skips intro sequence)
+		sta $10
+		lda #$0f
+		sta SND_CHN ; enable all APU channels except DMC
+		lda #$ff
+		sta NMI_FLAG ; select NMI #3
+		sta IRQ_FLAG ; select disk game IRQ
+		lda #$35
+		sta RST_FLAG ; set flag so soft resets work
+		lda #$53 ; soft reset
+		sta RST_TYPE
+		lda #$26 ; horizontal arrangement (vertical mirroring)
+		sta FDS_CTRL
+		jmp $80ad
+	
+	.segment "VECTORS_PATCH"
+; Note: IRQ handler is also bad in the original (rts x3)
+; (At least you can rewrite it to use IRQs in machine code programs now)
+		cli
+	.byte $5c, $60, $00 ; ?
+	.addr $00ed ; NMI vector?
+	
+	; Interrupt vectors
+	.addr $00ed ; NMI #1
+	.addr $00ed ; NMI #1
+	.addr $00ed ; NMI #3, default
+	.addr $c400 ; Reset
+	.addr $dff0 ; IRQ (unused?)
 
