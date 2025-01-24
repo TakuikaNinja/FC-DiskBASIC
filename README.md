@@ -19,7 +19,7 @@ This repository simplifies and automates the recreation process on modern comput
 
 - Boots straight into Game BASIC, as long as the keyboard is connected (no need to hold the T key on reset)
 - 8126 bytes of program memory (almost double that of v3.0!)
-- New `BGTOOL` command (replaces `BG GRAPHIC` option in menu, press `ESC -> STOP` to return to BASIC)
+- New `BGTOOL` command to instantly enter the graphics editor (replaces `SYSTEM` command, press `ESC -> STOP` to return to BASIC)
 - CHR data can be edited on the disk (typically using I2's Hokusai or Jingorou)
 - CHR-RAM can potentially be edited in real-time (e.g. within machine code programs)
 - Cassette tape I/O should still work
@@ -32,9 +32,9 @@ This repository simplifies and automates the recreation process on modern comput
 
 ## Building
 
-The Makefile builds `fcbasic.fds` using [Flips](https://github.com/Alcaro/Flips) (to modify the program data) and [ASM6f](https://github.com/freem/asm6f) (to assemble the disk image). The following files must be supplied by the user: 
+The Makefile builds `fcbasic.fds` using the [CC65 suite](https://cc65.github.io/). The following files must be supplied by the user: 
 - Dump of Family BASIC v2.1A, with iNES/NES2.0 header. (see below)
-- FDS BIOS license screen message (`kyodaku.bin`)
+- FDS BIOS license screen message. (`kyodaku.bin`)
 
 These files are not provided by this repo for obvious legal reasons. The required dump of Family BASIC v2.1A is the following: 
 
@@ -47,7 +47,9 @@ ROM SHA-1: 8E90D9A6A6090307A7E408D1C1704D09BA8F94FC
 ROM CRC32: 895037BC
 ```
 
-Note: `fcbasic.nes` is the intermediary patched file created by Flips, used to construct the CHR & PRG files on the disk image. It is not intended nor expected to execute correctly on Famicom or NES hardware/emulators.
+Notes:
+- `prg.bin` is the intermediary patched program code.
+- Older versions of this repository used [Flips](https://github.com/Alcaro/Flips) (to modify the program data with a BPS file) and [ASM6f](https://github.com/freem/asm6f) (to assemble the disk image). In this case, `fcbasic.nes` is the intermediary patched file used to construct the CHR & PRG files on the disk image instead. It is not intended nor expected to execute correctly on Famicom or NES hardware/emulators.
 
 ## Screenshots
 

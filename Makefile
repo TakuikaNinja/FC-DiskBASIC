@@ -1,18 +1,23 @@
 GAME=fcbasic
 FORMAT=fds
 OUTPUT=$(GAME).$(FORMAT)
-ORIG="Family BASIC (Japan) (Rev 2).nes"
-ASSEMBLER=asm6f
-FLAGS=-n -c -L -m
+ASSEMBLER=ca65
+LINKER=ld65
 
-all: clean $(OUTPUT)
+OBJ_FILES=$(GAME).o
 
-$(OUTPUT):
-	flips -a $(GAME).bps $(ORIG) $(GAME).nes
-	$(ASSEMBLER) $(GAME).asm $(FLAGS) $(OUTPUT)
+all: $(OUTPUT)
+
+$(OUTPUT): $(OBJ_FILES) $(GAME).cfg
+	$(LINKER) -o $(GAME).fds -C $(GAME).cfg $(OBJ_FILES) -m $(GAME).map.txt -Ln $(GAME).labels.txt --dbgfile $(GAME).dbg
+
+$(OBJ_FILES): $(GAME).asm
+
+%.o:%.asm
+	$(ASSEMBLER) $< -g -o $@
 
 .PHONY: clean
 
 clean:
-	rm -f *.lst $(GAME).nes $(OUTPUT) *.nl *.mlb *.cdl
+	rm -f *.lst $(OUTPUT) $(GAME).nes prg.bin *.nl *.mlb *.cdl *.o *.dbg *.nl *.map.txt *.labels.txt
 
