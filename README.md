@@ -68,13 +68,13 @@ Note: If an emulator does not support switching arbitrary disks without power-cy
 
 The following steps are used to save BASIC programs to disk:
 1. Create a program in Disk BASIC. 
-  1a. Entering `NEW` will *erase* the current program, which allows save data to be wiped.
+    1. Entering `NEW` will *erase* the current program, which allows save data to be wiped.
 2. Soft-reset the system by pressing the console's reset button, or by entering `CALL &HEE24` (the FDS BIOS reset handler).
 3. Enter `POKE &H102,0`, then swap to the save utility.
 4. Soft-reset the system a second time. This will load the save utility while preserving the data to be saved.
 5. Following the prompts in the save utility, eject the disk, then swap back to Disk BASIC. Wait while the data is saved onto disk.
 6. Once the eject prompt reappears, you may now eject the disk and power off the system.
-  6a. For drive emulators such as the [FDSKey](https://github.com/ClusterM/fdskey), ensure the disk image has finished saving to the microSD card before ejecting the disk or powering off the system.
+    1. For drive emulators such as the [FDSKey](https://github.com/ClusterM/fdskey), ensure the disk image has finished saving to the microSD card before ejecting the disk or powering off the system.
 7. The saved program will now be automatically be loaded into Disk BASIC on future startups.
 
 ## Screenshots
