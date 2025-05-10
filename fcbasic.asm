@@ -15,7 +15,7 @@
 	PRG = 0
 	CHR = 1
 	VRAM = 2
-	FILE_COUNT = 3
+	FILE_COUNT = 4
 	
 	PPUCTRL = $2000
 	NMI_FLAG = $0100
@@ -35,7 +35,16 @@
 ; Disk info + file amount blocks
 	.byte DiskInfoBlock
 	.byte "*NINTENDO-HVC*"
-	.res 41, 0
+	.byte "KOUJI" ; checked by save utility (these bytes are normally disk metadata)
+	.byte 0,0,0,0,0
+	.byte $0f ; boot read file code
+	.byte $ff, $ff, $ff, $ff, $ff ; unknown
+	.byte $61, $11, $27 ; manufacturing date (1986-11-27)
+	.byte $49, $61, $00, $00, $02 ; country, region, unknown
+	.byte $00, $5a, $00, $73, $00 ; unknown
+	.byte $61, $11, $27 ; disk rewrite date (same as manufacturing date)
+	.byte $FF, $FF, $FF, $FF, $FF ; unknown
+	.byte $00, $00, $00, $00 ; other fields (not relevant here)
 	
 	.byte FileAmountBlock
 	.byte FILE_COUNT
@@ -57,35 +66,51 @@
 	.incbin "kyodaku.bin"
 
 ; ----------------------------------------------------------------------------------------------------------------------------------
-; CHR
+; IPL-PRG (unused but counts towards file count)
 	.segment "FILE1_HDR"
 	.import __FILE1_DAT_RUN__
 	.import __FILE1_DAT_SIZE__
 	.byte FileHeaderBlock
-	.byte $01, $00
-	.byte "CHR",0,0,0,0,0
+	.byte $01, $01
+	.byte "IPL-PRG "
 	.word __FILE1_DAT_RUN__
 	.word __FILE1_DAT_SIZE__
-	.byte CHR
+	.byte PRG
 	
 	.byte FileDataBlock
 	.segment "FILE1_DAT"
-	.incbin FILE, INES_HDR + $8000, $2000
+	.include "ipl-prg.asm"
 
 ; ----------------------------------------------------------------------------------------------------------------------------------
-; PRG
+; CHR
 	.segment "FILE2_HDR"
 	.import __FILE2_DAT_RUN__
 	.import __FILE2_DAT_SIZE__
 	.byte FileHeaderBlock
-	.byte $02, $00
-	.byte "PRG",0,0,0,0,0
+	.byte $02, $02
+	.byte "CHR-ROM "
 	.word __FILE2_DAT_RUN__
 	.word __FILE2_DAT_SIZE__
-	.byte PRG
+	.byte CHR
 	
 	.byte FileDataBlock
 	.segment "FILE2_DAT"
+	.incbin FILE, INES_HDR + $8000, $2000
+
+; ----------------------------------------------------------------------------------------------------------------------------------
+; PRG
+	.segment "FILE3_HDR"
+	.import __FILE3_DAT_RUN__
+	.import __FILE3_DAT_SIZE__
+	.byte FileHeaderBlock
+	.byte $03, $03
+	.byte "PRG-ROM "
+	.word __FILE3_DAT_RUN__
+	.word __FILE3_DAT_SIZE__
+	.byte PRG
+	
+	.byte FileDataBlock
+	.segment "FILE3_DAT"
 ; Prepare original dump for patching
 	.incbin FILE, INES_HDR, PRG_SIZE
 
@@ -103,6 +128,8 @@
 	
 ; Specific patches
 	.segment "PATCH_0"
+		jsr $9228 ; extra patches
+		jsr $814b ; for disk saving
 		jmp $80f0 ; replaces jsr $8131
 	
 	.segment "PATCH_1"
@@ -116,6 +143,9 @@
 	
 	.segment "PATCH_4"
 	.byte $80
+	
+	.segment "SAVE_PATCH_0"
+	.byte $59 ; replaces operand of lda #$00
 	
 	.segment "BGTOOL_CMD"
 	.byte "BGTOOL" ; new command to launch BG GRAPHIC, replaces SYSTEM command
@@ -142,8 +172,51 @@
 		sta RST_TYPE
 		lda #$26 ; horizontal arrangement (vertical mirroring)
 		sta FDS_CTRL
+		jsr $c5a2 ; for save patch
 		jmp $80ad
 	
+	.segment "SAVE_PATCH_1"
+; $c5a1
+	.byte $00 ; this is a variable
+	
+; self-modifying code incoming
+		lda $c5a1
+		cmp #$ea
+		bne :+
+
+		jsr $c5d7
+:
+		lda #$00
+		sta $c5b5
+		sta $c5b8
+; $c5b4
+:
+		lda $6010 ; this address...
+		sta a:$0010 ; and this address are modified
+		inc $c5b5
+		inc $c5b8
+		lda $c5b8
+		cmp #$10
+		bne :-
+
+		lda #$ea
+		sta $c5a1
+		lda #$60
+		sta $c5b6
+		lda #$00
+		sta $c5b9
+		rts
+
+; $c5d7
+		lda #$00
+		sta $c5b6
+		lda #$60
+		sta $c5b9
+		rts
+
+; $c5e2
+		rts ; probably makes a subroutine exit?
+
 	.segment "VECTORS_PATCH"
 ; Note: IRQ handler is also bad in the original (rts x3)
 ; (At least you can rewrite it to use IRQs in machine code programs now)
