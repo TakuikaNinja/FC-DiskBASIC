@@ -2,21 +2,19 @@
 
 https://github.com/TakuikaNinja/FC-DiskBASIC
 
-This is an unofficial Famicom Disk System (FDS) port of Family BASIC v2.1A, originally documented as a manual process in magazines such as バックアップ活用テクニック (Backup Utilization Techniques) Part 8 and ファミコン改造マニュアル (Famicom Hacking/Modding Manual) Vol. 2 & Vol. 3. I2 would later release the Disk BASIC Generator Kit for their Souseiki Fammy to automate the process and provide additional features.
+This is an unofficial Famicom Disk System (FDS) port of Family BASIC v2.1A, originally documented as a manual process in magazines such as バックアップ活用テクニック (Backup Utilization Techniques) Part 8 and ファミコン改造マニュアル (Famicom Hacking/Modding Manual) Vol. 2 & 3. I2 would later release the Disk BASIC Generator Kit for their Souseiki Fammy to automate the process and provide additional features.
 
 The original process listed in バックアップ活用テクニック Part 8 involved:
 1. Constructing custom hardware to interface between the Family BASIC cartridge, the FDS, and a PC6601SR
 2. Dumping Family BASIC to disk using custom programs (PC & FDS)
 3. Editing the program data on the disk using the PC
 
-Note: Due to the specific hardware requirements, this method is currently considered as impractical to replicate.
-
-The original process listed in ファミコン改造マニュアル Vol. 2 involved:
-1. Dumping Family BASIC to cassette tape using a custom BASIC program
+Due to the specific hardware requirements, this method is currently considered as impractical to replicate. In fact, ファミコン改造マニュアル cites this as the reason for creating the newer process. The process listed in ファミコン改造マニュアル Vol. 2 & 3 involved:
+1. Dumping Family BASIC to cassette tape using custom BASIC programs
 2. Loading the cassette tape data and saving it to disk using a custom disk program
 3. Editing the program data on the disk using Tonkachi Editor
 
-Note: This is currently considered as the more practical method to replicate, since only Famicom software/peripherals are required. Modern devices can replace the physical cassette tape and disks. However, the specifics of this process, such as the custom BASIC and disk programs, are yet to be documented.
+This is currently considered to be the more practical method to replicate, since only Famicom software/peripherals are required. Modern devices can replace the physical cassette tape and disks. The BASIC listings and disk programs used for this process have been obtained and will eventually be archived separately from this repository.
 
 This repository simplifies and automates the recreation process on modern computers by directly modifying an existing ROM dump and constructing an FDS disk image from it.
 
@@ -34,7 +32,7 @@ This repository simplifies and automates the recreation process on modern comput
 
 ### Cons
 
-- No disk I/O (only added in ファミコン改造マニュアル Vol. 3 + I2 version, yet to be documented)
+- No disk I/O (only available in ファミコン改造マニュアル Vol. 3 + I2 versions)
 - Limited to v2.1A feature set
 
 ## Building
@@ -55,21 +53,29 @@ ROM CRC32: 895037BC
 ```
 
 Notes:
-- `prg.bin` is the intermediary patched program code.
-- Older versions of this repository used [Flips](https://github.com/Alcaro/Flips) (to modify the program data with a BPS file) and [ASM6f](https://github.com/freem/asm6f) (to assemble the disk image). In this case, `fcbasic.nes` is the intermediary patched file used to construct the CHR & PRG files on the disk image instead. It is not intended nor expected to execute correctly on Famicom or NES hardware/emulators.
+- In older versions, `prg.bin` is the intermediary patched program code.
+- Even older versions of this repository used [Flips](https://github.com/Alcaro/Flips) (to modify the program data with a BPS file) and [ASM6f](https://github.com/freem/asm6f) (to assemble the disk image). In this case, `fcbasic.nes` is the intermediary patched file used to construct the CHR & PRG files on the disk image instead. It is not intended nor expected to execute correctly on Famicom or NES hardware/emulators.
 
 ## Screenshots
 
 ![Startup screen](/img/fcbasic_000.png)
 ![Example program](/img/fcbasic_001.png)
 
-## Acknowledgements
+## Attributions
 
 Family BASIC/NS-HUBASIC (C) 1984 Nintendo/Sharp/Hudson. 
+
+ファミコン改造マニュアル Vol.2 & 3 Disk BASIC
+- Article Author: 熊沢文幸 (Fumiyuki Kumazawa)
+- Editor: 丹治佐一 (Saichi Tanji)
+- Published: 1988-02, 1988-07
+- Publisher: 三才ブックス (Sansai Books)
+
 This project is purely for preservation, demonstration, and educational purposes.
 
-- Kudos to the magazine contributors, editors, and publishers who originally created the port and documented the process.
-- This project was made possible by Enri, who provided Japanese documentation for the recreation process: http://cmpslv3.stars.ne.jp/Konjo/027/027.htm
+## Acknowledgements
+
+- Thanks to Enri, who provided Japanese documentation for the recreation process: http://cmpslv3.stars.ne.jp/Konjo/027/027.htm
 - Forum discussion: https://forums.nesdev.org/viewtopic.php?t=25171
-- Mesen (https://www.mesen.ca/) was used for testing.
+- Mesen2 (https://www.mesen.ca/) was used for testing.
 
