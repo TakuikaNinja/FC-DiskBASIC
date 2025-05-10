@@ -2,6 +2,8 @@
 
 https://github.com/TakuikaNinja/FC-DiskBASIC
 
+For the older version without disk saving, see the `vol2` branch: https://github.com/TakuikaNinja/FC-DiskBASIC/tree/vol2
+
 This is an unofficial Famicom Disk System (FDS) port of Family BASIC v2.1A, originally documented as a manual process in magazines such as バックアップ活用テクニック (Backup Utilization Techniques) Part 8 and ファミコン改造マニュアル (Famicom Hacking/Modding Manual) Vol. 2 & 3. I2 would later release the Disk BASIC Generator Kit for their Souseiki Fammy to automate the process and provide additional features.
 
 The original process listed in バックアップ活用テクニック Part 8 involved:
@@ -25,6 +27,7 @@ This repository simplifies and automates the recreation process on modern comput
 - Boots straight into Game BASIC, as long as the keyboard is connected (no need to hold the T key on reset)
 - 8126 bytes of program memory (almost double that of v3.0!)
 - New `BGTOOL` command to instantly enter the graphics editor (replaces `SYSTEM` command, press `ESC -> STOP` to return to BASIC)
+- Disk saving via the included save utility. (see instructions below)
 - CHR data can be edited on the disk (typically using I2's Hokusai or Jingorou)
 - CHR-RAM can potentially be edited in real-time (e.g. within machine code programs)
 - Cassette tape I/O should still work
@@ -32,12 +35,11 @@ This repository simplifies and automates the recreation process on modern comput
 
 ### Cons
 
-- No disk I/O (only available in ファミコン改造マニュアル Vol. 3 + I2 versions)
 - Limited to v2.1A feature set
 
 ## Building
 
-The Makefile builds `fcbasic.fds` using the [CC65 suite](https://cc65.github.io/). The following files must be supplied by the user: 
+The Makefile in this root directory builds `fcbasic.fds` using the [CC65 suite](https://cc65.github.io/). The following files must be supplied by the user: 
 - Dump of Family BASIC v2.1A, with iNES/NES2.0 header. (see below)
 - FDS BIOS license screen message. (`kyodaku.bin`)
 
@@ -55,6 +57,25 @@ ROM CRC32: 895037BC
 Notes:
 - In older versions, `prg.bin` is the intermediary patched program code.
 - Even older versions of this repository used [Flips](https://github.com/Alcaro/Flips) (to modify the program data with a BPS file) and [ASM6f](https://github.com/freem/asm6f) (to assemble the disk image). In this case, `fcbasic.nes` is the intermediary patched file used to construct the CHR & PRG files on the disk image instead. It is not intended nor expected to execute correctly on Famicom or NES hardware/emulators.
+
+### Save Utility
+
+The required save utility has been provided as a disassembly in the `save_utility` directory. The Makefile there will build `save_utility.fds`. The FDS BIOS license screen message (`kyodaku.bin`) used for Disk BASIC is also required to build this program - it will reuse the file placed in the root directory.
+
+## Disk Saving
+
+Note: If an emulator does not support switching arbitrary disks without power-cycling, concatenate Disk BASIC and the save utility to form a two-sided disk.
+
+The following steps are used to save BASIC programs to disk:
+1. Create a program in Disk BASIC. 
+  1a. Entering `NEW` will *erase* the current program, which allows save data to be wiped.
+2. Soft-reset the system by pressing the console's reset button, or by entering `CALL &HEE24` (the FDS BIOS reset handler).
+3. Enter `POKE &H102,0`, then swap to the save utility.
+4. Soft-reset the system a second time. This will load the save utility while preserving the data to be saved.
+5. Following the prompts in the save utility, eject the disk, then swap back to Disk BASIC. Wait while the data is saved onto disk.
+6. Once the eject prompt reappears, you may now eject the disk and power off the system.
+  6a. For drive emulators such as the [FDSKey](https://github.com/ClusterM/fdskey), ensure the disk image has finished saving to the microSD card before ejecting the disk or powering off the system.
+7. The saved program will now be automatically be loaded into Disk BASIC on future startups.
 
 ## Screenshots
 
