@@ -62,6 +62,8 @@ Notes:
 
 The required save utility has been provided as a disassembly in the `save_utility` directory. The Makefile there will build `save_utility.fds`. The FDS BIOS license screen message (`kyodaku.bin`) used for Disk BASIC is also required to build this program - it will reuse the file placed in the root directory.
 
+Note: This utility is compatible with the 01A (later RAM adapters) and 02 (Sharp Twin Famicom) BIOS revisions by default. `make OLD_DISKSYS=1` will build a version which is compatible with the 01 (early RAM adapters) BIOS revision instead.
+
 ## Disk Saving
 
 Note: If an emulator does not support switching arbitrary disks without power-cycling, concatenate Disk BASIC and the save utility to form a two-sided disk.
@@ -69,7 +71,7 @@ Note: If an emulator does not support switching arbitrary disks without power-cy
 The following steps are used to save BASIC programs to disk:
 1. Create a program in Disk BASIC. 
     1. Entering `NEW` will *erase* the current program, which allows save data to be wiped.
-2. Soft-reset the system by pressing the console's reset button, or by entering `CALL &HEE24` (the FDS BIOS reset handler).
+2. Soft-reset the system by pressing the console's reset button, or by entering `CALL &HC400` (Disk BASIC's reset handler).
 3. Enter `POKE &H102,0`, then swap to the save utility.
 4. Soft-reset the system a second time. This will load the save utility while preserving the data to be saved.
 5. Following the prompts in the save utility, eject the disk, then swap back to Disk BASIC. Wait while the data is saved onto disk.

@@ -6,6 +6,11 @@
 ; ----------------------------------------------------------------------------------------------------------------------------------
 ; Disk Layout
 ; ----------------------------------------------------------------------------------------------------------------------------------
+; Build-time constants
+.ifndef OLD_DISKSYS
+	OLD_DISKSYS = 0
+.endif
+
 ; Definitions
 .enum
 	DiskInfoBlock	= 1
@@ -27,8 +32,16 @@
 	VRAMStructWrite = $e7bb
 	SetScroll = $eaea
 	
-	FDS_RESET = $ee24 ; location of BIOS reset handler
-	PrintError = $f179 ; BIOS routine to print disk error codes
+	FDS_RESET = $FFFC ; BIOS reset handler vector
+	
+	 ; BIOS routine to print disk error codes
+	 ; location differs between BIOS revisions, 
+	 ; original listing uses $f179
+	.if OLD_DISKSYS = 1
+		PrintError = $f16c ; 01 revision
+	.else
+		PrintError = $f179 ; 01A, 02 revisions
+	.endif
 .endenum
 
 ; ----------------------------------------------------------------------------------------------------------------------------------
@@ -111,7 +124,12 @@ ldc32:
 	.addr ldc99 ; disk ID struct
 	.addr ldcc3 ; save file header
 		bne ldc40 ; branch on error
-		jmp FDS_RESET ; soft-reset on success
+		
+		; soft-reset on success
+		; the original listing hardcoded a jmp $ee24 here, 
+		; but that only works on 01A & 02 BIOS revisions
+		; ($ee17 in 01 revision)
+		jmp (FDS_RESET)
 
 ldc40:
 		sta $23 ; save error code

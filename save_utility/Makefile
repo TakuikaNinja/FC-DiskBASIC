@@ -4,6 +4,13 @@ OUTPUT=$(GAME).$(FORMAT)
 ASSEMBLER=ca65
 LINKER=ld65
 
+FLAGS = -g
+
+OLD_DISKSYS=0 # Will be overriden by variable set in `make` command line
+ifeq ($(OLD_DISKSYS),1)
+FLAGS += -D OLD_DISKSYS=1
+endif
+
 OBJ_FILES=$(GAME).o
 
 all: $(OUTPUT)
@@ -14,7 +21,7 @@ $(OUTPUT): $(OBJ_FILES) $(GAME).cfg
 $(OBJ_FILES): $(GAME).asm
 
 %.o:%.asm
-	$(ASSEMBLER) $< -g -o $@
+	$(ASSEMBLER) $< $(FLAGS) -o $@
 
 .PHONY: clean
 
