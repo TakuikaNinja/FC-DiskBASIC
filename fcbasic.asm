@@ -145,7 +145,7 @@
 	.byte $80
 	
 	.segment "SAVE_PATCH_0"
-	.byte $59 ; replaces operand of lda #$00
+	.byte $59 ; replaces operand of ldy #$00
 	
 	.segment "BGTOOL_CMD"
 	.byte "BGTOOL" ; new command to launch BG GRAPHIC, replaces SYSTEM command
@@ -174,24 +174,31 @@
 		sta FDS_CTRL
 		jsr $c5a2 ; for save patch
 		jmp $80ad
-	
+
+; this routine does two things:
+; 1. save $6000-$600f contents to $0000-$000f on cold starts
+; 2. restore $6000-$600f contents from $0000-$000f on warm starts (i.e. so it can be saved to disk)
 	.segment "SAVE_PATCH_1"
 ; $c5a1
-	.byte $00 ; this is a variable
+	.byte $00 ; this is a variable which stores the warm start flag
 	
 ; self-modifying code incoming
 		lda $c5a1
-		cmp #$ea
+		cmp #$ea ; check warm start flag
 		bne :+
 
-		jsr $c5d7
+		jsr $c5d7 ; warm start
 :
-		lda #$00
+		lda #$00 ; set addresses to $xx00
 		sta $c5b5
 		sta $c5b8
 ; $c5b4
 :
+; $c5b5 = *+1
+; $c5b6 = *+2
 		lda $6010 ; this address...
+; $c5b8 = *+1
+; $c5b9 = *+2
 		sta a:$0010 ; and this address are modified
 		inc $c5b5
 		inc $c5b8
@@ -199,15 +206,15 @@
 		cmp #$10
 		bne :-
 
-		lda #$ea
+		lda #$ea ; write warm start flag
 		sta $c5a1
-		lda #$60
+		lda #$60 ; restore address 1 to $60xx
 		sta $c5b6
-		lda #$00
+		lda #$00 ; restore address 2 to $00xx
 		sta $c5b9
 		rts
 
-; $c5d7
+; $c5d7, swap addresses to $00xx and $60xx on warm starts
 		lda #$00
 		sta $c5b6
 		lda #$60
@@ -218,7 +225,7 @@
 		rts ; probably makes a subroutine exit?
 
 	.segment "VECTORS_PATCH"
-; Note: IRQ handler is also bad in the original (rts x3)
+; Note: IRQ handler is also bad in the original, which has been duplicated here
 ; (At least you can rewrite it to use IRQs in machine code programs now)
 		cli
 	.byte $5c, $60, $00 ; ?
@@ -226,7 +233,7 @@
 	
 	; Interrupt vectors
 	.addr $00ed ; NMI #1
-	.addr $00ed ; NMI #1
+	.addr $00ed ; NMI #2
 	.addr $00ed ; NMI #3, default
 	.addr $c400 ; Reset
 	.addr $dff0 ; IRQ (unused?)
