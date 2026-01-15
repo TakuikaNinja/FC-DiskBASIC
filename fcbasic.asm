@@ -145,7 +145,7 @@
 		jmp $80ad
 	
 	.segment "VECTORS_PATCH"
-; Note: IRQ handler is also bad in the original (rts x3)
+; Note: IRQ handler is also bad in the original, which has been duplicated here
 ; (At least you can rewrite it to use IRQs in machine code programs now)
 		cli
 	.byte $5c, $60, $00 ; ?
@@ -153,7 +153,7 @@
 	
 	; Interrupt vectors
 	.addr $00ed ; NMI #1
-	.addr $00ed ; NMI #1
+	.addr $00ed ; NMI #2
 	.addr $00ed ; NMI #3, default
 	.addr $c400 ; Reset
 	.addr $dff0 ; IRQ (unused?)
